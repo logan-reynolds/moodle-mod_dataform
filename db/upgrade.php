@@ -70,6 +70,40 @@ function xmldb_dataform_upgrade($oldversion) {
     xmldb_dataform_upgrade_2015051100($dbman, $oldversion);
     xmldb_dataform_upgrade_2015061800_01($dbman, $oldversion);
 
+    // Add a standard upgrade step to handle table updates that were missed in 2015061800_01 function.
+    if ($oldversion < 2017051503) {
+        // Add field entrytypes to dataform.
+        $table = new xmldb_table('dataform');
+        $field = new xmldb_field('entrytypes', XMLDB_TYPE_TEXT, 'small', null, null, null, null, 'gradeitems');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add field entrytype to dataform views.
+        $table = new xmldb_table('dataform_views');
+        $field = $field = new xmldb_field('entrytype', XMLDB_TYPE_CHAR, '32', null, null, null, null, 'visible');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add field entrytype to dataform filters.
+        $table = new xmldb_table('dataform_filters');
+        $field = $field = new xmldb_field('entrytype', XMLDB_TYPE_CHAR, '32', null, null, null, null, 'visible');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add field type to dataform entries.
+        $table = new xmldb_table('dataform_entries');
+        $field = $field = new xmldb_field('type', XMLDB_TYPE_CHAR, '32', null, null, null, null, 'id');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Dataform savepoint reached.
+        upgrade_mod_savepoint(true, 2017051503, 'dataform');
+    }
+
     return true;
 }
 
